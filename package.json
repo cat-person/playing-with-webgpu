@@ -1,0 +1,17 @@
+{
+    "name": "webgpu",
+    "version": "0.1.0",
+    "description": "🔺 A simple hello triangle example introducing WebGPU.",
+    "scripts": {
+        "start": "npm i && npm run build && npm run dev",
+        "dev": "http-server",
+        "build": "cross-env NODE_ENV=production ts-node webpack.ts"
+    },
+    "devDependencies": {
+        "http-server": "^14.1.x",
+        "webpack": "^5.75.x"
+    },
+    "dependencies": {
+        
+    }
+}
