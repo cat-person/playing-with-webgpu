@@ -4,14 +4,14 @@
     "description": "🔺 A simple hello triangle example introducing WebGPU.",
     "scripts": {
         "build": "npm i && cross-env NODE_ENV=production ts-node webpack.ts",
-        "simple-triangle": "http-server -f simple_triangle/index.html",
-        "compute": "http-server compute"
+        "start": "http-server",
+        "rebuild": "rm -rf node_modules && npm run build"
     },
     "devDependencies": {
         "http-server": "^14.1.x",
         "webpack": "^5.75.x"
     },
     "dependencies": {
-
+        "wgpu-matrix": "^2.5.0"
     }
 }

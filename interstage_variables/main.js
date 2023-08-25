@@ -14,11 +14,8 @@ async function main() {
   // Get a WebGPU context from the canvas and configure it
   const canvas = document.querySelector('canvas');
   const context = canvas.getContext('webgpu');
-  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-  context.configure({
-    device,
-    format: presentationFormat,
-  });
+  const format = navigator.gpu.getPreferredCanvasFormat();
+  context.configure({ device, format });
 
   const pipeline = device.createRenderPipeline({
     label: 'hardcoded rgb triangle pipeline',
