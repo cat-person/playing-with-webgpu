@@ -1,36 +1,26 @@
-// width, height in pixels
-// @group(0)
-// @binding(0)
-// var<uniform> image_size: vec2u;
-
-// @group(1)
-// @binding(0)
-// var<storage, read_write> pixels: array<u32>;
-
-// @builtin(global_invocation_id) global_id : vec3<u32>
+struct FsInput {
+    @builtin(position) position: vec4f,
+}
 
 @fragment 
-fn main() -> @location(0) vec4f {
-    // let aspect_ratio = f32(800) / f32(600);
-    // let viewport_size = vec2f(aspect_ratio, 1.0) * 3.5;
-    // let step = viewport_size / vec2f(800, 600);
+fn main(fsInput: FsInput) -> @location(0) vec4f {
+    let pos = vec2f(
+        (fsInput.position[0] - 450.0) / 200.0, 
+        (fsInput.position[1] - 400.0) / 200.0);
 
-    // // id.xy
-    // let pos = vec2f(global_id.xy) * step - viewport_size / 2.0;
-    // var z = pos;
-    // var i = 254u;
+    var z = pos;
+    var i = 254u;
 
-    // while !oob(z, viewport_size) && i > 0u {
-    //     i -= 1u;
-    //     z = square(z) + pos;
-    // }
+    while !oob(z) && i > 0u {
+        i -= 1u;
+        z = square(z) + pos;
+    }
 
-    // if(i == 0) {
-    //     return vec4f(0.8,0.8,0.8,1);
-    // } else {
-    //     return vec4f(0.1,0.1,0.1,1);
-    // }
-    return vec4f(0.8,0.4,0.2,1);
+    if(i == 0) {
+        return vec4f(0.8,0.8,0.8,1);
+    } else {
+        return vec4f(0.1,0.13,0.2,1);
+    }
 }
 
 fn square(c: vec2f) -> vec2f {
@@ -41,6 +31,6 @@ fn square(c: vec2f) -> vec2f {
     );
 }
 
-fn oob(c: vec2f, viewport_size: vec2f) -> bool {
-    return abs(c.x) > viewport_size.x / 2f || abs(c.y) > viewport_size.y / 2f;
+fn oob(c: vec2f) -> bool {
+    return abs(c.x) > 2f || abs(c.y) > 2f;
 }
