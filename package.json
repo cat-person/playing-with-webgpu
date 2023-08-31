@@ -5,7 +5,7 @@
     "scripts": {
         "build": "npm i && cross-env NODE_ENV=production ts-node webpack.ts",
         "start": "http-server",
-        "rebuild": "rm -rf node_modules && npm run build"
+        "rebuild": "rm -rf node_modules && npm cache clean --force && npm run build"
     },
     "devDependencies": {
         "http-server": "^14.1.x",
