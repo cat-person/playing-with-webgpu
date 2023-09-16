@@ -6,7 +6,7 @@ struct FsInput {
 fn main(fsInput: FsInput) -> @location(0) vec4f {
     let pos = vec2f(
         (fsInput.position[0] - 450.0) / 200.0, 
-        (fsInput.position[1] - 400.0) / 200.0);
+        (fsInput.position[1] - 300.0) / 200.0);
 
     var z = pos;
     var i = 254u;
