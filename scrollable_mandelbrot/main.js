@@ -50,39 +50,77 @@ async function main() {
     ],
   };
 
-  render(0.9, adapter, device, canvas, context, pipeline, renderPassDescriptor);
+  render(1.0, centerX, centerY, device, context, pipeline, renderPassDescriptor);
 
-  canvas.onmousemove = function(event){ 
-    const rect = canvas.getBoundingClientRect();
-    let x = (event.x - rect.left - 400) / 400;
-    let y = (event.y - rect.top - 300) / 300;
-    document.getElementById("currentCoordinates").textContent = `Current coordinates [ ${x} : ${y} ]`;
+  var prevDragOffset = {
+    x: 0,
+    y: 0
+  }
+
+  canvas.onmousedown = (event) => {
+    prevDragOffset = {
+      x: event.x,
+      y: event.y
+    }
+    // console.log(`${event.type} ${JSON.stringify(prevDragOffset)}`)
+  }
+  
+  // canvas.onmouseup = (event) => {
+  //   prevDragOffset = {
+  //     x: 0.0,
+  //     y: 0.0
+  //   }
+  //   console.log(`${event.type} ${JSON.stringify(prevDragOffset)}`)
+  // }
+
+  canvas.ondrag = (event) => {
+    if(event.y < 1.0 && event.x < 1.0) {
+      console.log(`${event.type} ${JSON.stringify(event)}`)
+    } else {
+      document.getElementById("currentCoordinates").textContent = 
+        `${event.type} dxy: [ ${event.x - prevDragOffset.x} : ${event.y - prevDragOffset.y} ]`
+
+      var scrollLevelLog = Math.pow(2, scrollLevel)
+
+      centerX -= scrollLevelLog * (event.x - prevDragOffset.x) / 200
+      centerY -= scrollLevelLog * (event.y - prevDragOffset.y) / 200
+
+      render(scrollLevelLog, centerX, centerY, device, context, pipeline, renderPassDescriptor);
+    }
+
+    prevDragOffset = {
+      x: event.x,
+      y: event.y
+    }
+    
   };
 
   document.onwheel = function(event){ 
     const rect = canvas.getBoundingClientRect()
-    let x = (event.x - rect.left - 400) / 400;
-    let y = (event.y - rect.top - 300) / 300;
-  
-    let scrollDelta = event.wheelDeltaY / 10000;
-    scrollLevel = scrollLevel + scrollDelta;
+    
+    let scrollDelta = -event.wheelDeltaY / 10000;
+    var scrollLevelLog = Math.pow(2, scrollLevel)
+    scrollLevel += scrollDelta;
     let scrollExp = Math.pow(2, scrollLevel);
     let scrollDiff = Math.pow(2, scrollDelta);
   
+    let x = scrollLevelLog * (event.x - rect.left - 400) / 200;
+    let y = scrollLevelLog * (event.y - rect.top - 300) / 200;
+
     centerX += x * (1 - scrollDiff);
     centerY += y * (1 - scrollDiff);
   
-    document.getElementById("scrollLevel").textContent = `Scroll level: ${scrollExp}`;
+    document.getElementById("scrollLevel").textContent = `Scroll level: ${scrollExp} scrollDiff: ${scrollDiff}`;
   
     document.getElementById("centerCoordinates").textContent = `Center coordinates [ ${centerX} : ${centerY} ]`;
     
-    document.getElementById("borderCoordinates").textContent = `canvasView.x: ${rect.top}, canvasView.y : ${rect.left}`;
+    document.getElementById("borderCoordinates").textContent = `x: ${x}, y : ${y}`;
 
-    render(Math.pow(2, scrollLevel), adapter, device, canvas, context, pipeline, renderPassDescriptor);
+    render(scrollExp, centerX, centerY, device, context, pipeline, renderPassDescriptor);
   };
 }
 
-function  render(scaleLevel, adapter, device, canvas, context, pipeline, renderPassDescriptor) {
+function  render(scaleLevel, centerX, centerY, device, context, pipeline, renderPassDescriptor) {
 
   console.log(`scaleLevel = ${scaleLevel}`)
 
@@ -96,12 +134,12 @@ function  render(scaleLevel, adapter, device, canvas, context, pipeline, renderP
   // create a typedarray to hold the values for the uniforms in JavaScript
   const uniformValues = new Float32Array(uniformBufferSize / 4);
 
-  uniformValues.set([0.0, 0.0], 0);        // set the coordinates
+  uniformValues.set([centerX, centerY], 0);        // set the coordinates
   uniformValues.set([scaleLevel], 2);             // set the scale
 
   // Set the uniform values in our JavaScript side Float32Array
   // const aspect = canvas.width / canvas.height;
-  uniformValues.set(1.0, 2); // set the scale
+  // uniformValues.set(1.0, 2); // set the scale
 
   // copy the values from JavaScript to the GPU
   device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
