@@ -1,11 +1,11 @@
-struct OurStruct {
+struct RectStruct {
     centerX: f32,
     centerY: f32,
     width: f32,
     height: f32,
 };
  
-@group(0) @binding(0) var<uniform> ourStruct: OurStruct;
+// @group(0) @binding(0) var<uniform> rect: RectStruct;
 
 @vertex
 fn main(@builtin(vertex_index) idx : u32) -> @builtin(position) vec4f {
