@@ -1,6 +1,5 @@
 import { getShaderSource } from "../common/shader_loader.js";
-const vertShaderCode = await getShaderSource("./shaders/vert.wgsl");
-const fragShaderCode = await getShaderSource("./shaders/frag.wgsl");
+const shaderCode = await getShaderSource("./shaders/shader.wgsl");
 
 async function main() {
   const adapter = await navigator.gpu?.requestAdapter();
@@ -25,17 +24,19 @@ async function main() {
     format: presentationFormat,
   });
 
+  const shaderModule = device.createShaderModule({ code: shaderCode });
+
   const pipeline = device.createRenderPipeline({
     label: "triangle with uniforms",
     layout: "auto",
     vertex: {
-      module: device.createShaderModule({ code: vertShaderCode }),
-      entryPoint: "main",
+      module: shaderModule,
+      entryPoint: "vs",
       targets: [{ format: presentationFormat }],
     },
     fragment: {
-      module: device.createShaderModule({ code: fragShaderCode }),
-      entryPoint: "main",
+      module: shaderModule,
+      entryPoint: "fs",
       targets: [{ format: presentationFormat }],
     },
   });
@@ -74,20 +75,19 @@ function render(
   pipeline,
   renderPassDescriptor,
 ) {
-  const uniformBufferSize = 16; // offset is 2 32bit floats (4bytes each)
+  const uniformBufferSize = 32; // offset is 2 32bit floats (4bytes each)
   const uniformBuffer = device.createBuffer({
     label: "uniforms scroll params",
     size: uniformBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
   });
 
   // create a typedarray to hold the values for the uniforms in JavaScript
-  const uniformValues = new Float32Array(4);
+  const uniformValues = new Float32Array(uniformBufferSize / 4);
 
-  uniformValues.set(centerX, 0);
-  uniformValues.set(centerY, 1);
-  uniformValues.set(width, 2);
-  uniformValues.set(height, 3);
+  uniformValues.set([centerX, centerY], 0);
+  uniformValues.set([width, height], 2);
+  uniformValues.set([0.3, 0.3, 0.3, 1.0], 4); // Color rgba
 
   // copy the values from JavaScript to the GPU
   device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
@@ -108,7 +108,7 @@ function render(
   const pass = encoder.beginRenderPass(renderPassDescriptor);
   pass.setPipeline(pipeline);
   pass.setBindGroup(0, bindGroup);
-  pass.draw(6); // call our vertex shader 3 times
+  pass.draw(3); // call our vertex shader 3 times
   pass.end();
 
   const commandBuffer = encoder.finish();
