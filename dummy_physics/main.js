@@ -75,7 +75,7 @@ function render(
   pipeline,
   renderPassDescriptor,
 ) {
-  const uniformBufferSize = 32; // offset is 2 32bit floats (4bytes each)
+  const uniformBufferSize = 48; // offset is 2 32bit floats (4bytes each)
   const uniformBuffer = device.createBuffer({
     label: "uniforms scroll params",
     size: uniformBufferSize,
@@ -85,9 +85,10 @@ function render(
   // create a typedarray to hold the values for the uniforms in JavaScript
   const uniformValues = new Float32Array(uniformBufferSize / 4);
 
-  uniformValues.set([centerX, centerY], 0);
-  uniformValues.set([width, height], 2);
-  uniformValues.set([0.3, 0.3, 0.3, 1.0], 4); // Color rgba
+  uniformValues.set([800, 600], 0);
+  uniformValues.set([centerX, centerY], 2);
+  uniformValues.set([width, height], 4);
+  uniformValues.set([0.3, 0.3, 0.3, 1.0], 6); // Color rgba
 
   // copy the values from JavaScript to the GPU
   device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
@@ -108,7 +109,7 @@ function render(
   const pass = encoder.beginRenderPass(renderPassDescriptor);
   pass.setPipeline(pipeline);
   pass.setBindGroup(0, bindGroup);
-  pass.draw(3); // call our vertex shader 3 times
+  pass.draw(6); // call our vertex shader 3 times
   pass.end();
 
   const commandBuffer = encoder.finish();
